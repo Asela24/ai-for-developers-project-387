@@ -211,6 +211,21 @@ it("rejects booking the same Slot twice as a conflict", async () => {
   expect(again.json()).toEqual(conflict);
 });
 
+it("rejects an invalid topic as a data error before the conflict check", async () => {
+  const app = await appWith(hour);
+  expect((await book(app, booking)).statusCode).toBe(201);
+  const { topic: _topic, ...withoutTopic } = booking;
+
+  for (const payload of [withoutTopic, { ...booking, topic: "" }]) {
+    const res = await book(app, payload);
+    expect({ payload, status: res.statusCode, body: res.json() }).toEqual({
+      payload,
+      status: 400,
+      body: dataError,
+    });
+  }
+});
+
 it("allows a start at 11:00 right after a 10:00–11:00 Booking", async () => {
   const app = await appWith(hour);
   expect((await book(app, booking)).statusCode).toBe(201);

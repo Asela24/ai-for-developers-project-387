@@ -97,6 +97,8 @@ test("Guest books a free Slot with a topic and the Owner sees it in the upcoming
     .first()
     .click();
   await page.getByRole("button", { name: "Продолжить" }).click();
+  await expect(page.getByLabel("Имя")).toHaveValue("");
+  await expect(page.getByLabel("Почта")).toHaveValue("");
   await expect(page.getByLabel("Тема разговора")).toHaveValue("");
 
   // The Owner sees the Guest’s Booking in the upcoming list, the topic under name and email.
@@ -108,8 +110,10 @@ test("Guest books a free Slot with a topic and the Owner sees it in the upcoming
   await expect(booking).toContainText("Разбор");
   await expect(booking).toContainText(`${dayName}, ${time}`);
   const shownTopic = booking.getByText("Хочу разобрать архитектуру");
-  await expect(shownTopic).toHaveText(topic);
   await expect(shownTopic).toHaveCSS("white-space", "pre-line");
+  // innerText keeps the line break, so the topic is shown exactly as typed.
+  expect(await shownTopic.innerText()).toBe(topic);
   const lines = await booking.locator("p").allInnerTexts();
+  expect(lines.indexOf("lidia@example.com")).toBeGreaterThan(-1);
   expect(lines.indexOf(topic)).toBe(lines.indexOf("lidia@example.com") + 1);
 });
