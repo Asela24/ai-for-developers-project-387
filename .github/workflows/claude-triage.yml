@@ -1,0 +1,52 @@
+name: claude-triage
+
+on:
+  issues:
+    types: [opened]
+
+# The job is the only consumer of these permissions.
+permissions: {}
+
+jobs:
+  triage:
+    name: Auto-triage new issue
+    # Incoming requests only. Issues opened by bots (claude[bot] running
+    # to-tickets) and issues that already carry a triage label
+    # (docs/agents/triage-labels.md) were prepared on purpose and are skipped.
+    # Trusted authors only, as in claude.yml: the run spends the Claude token.
+    if: >-
+      github.event.issue.user.type != 'Bot' &&
+      (github.event.issue.author_association == 'OWNER' ||
+       github.event.issue.author_association == 'MEMBER' ||
+       github.event.issue.author_association == 'COLLABORATOR') &&
+      !contains(github.event.issue.labels.*.name, 'ready-for-agent') &&
+      !contains(github.event.issue.labels.*.name, 'needs-info') &&
+      !contains(github.event.issue.labels.*.name, 'wontfix')
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      # Exchanged for the Claude GitHub App token that comments and labels.
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      # Triage reads code and talks on the issue; it never builds or edits,
+      # so there is no toolchain install and no git, pnpm or mise.
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Run the `triage` skill on issue #${{ github.event.issue.number }} of ${{ github.repository }}.
+            Do not change code.
+          claude_args: |
+            --model claude-opus-5-5
+            --allowedTools "Skill,Read,Grep,Glob,Bash(gh issue view:*),Bash(gh issue list:*),Bash(gh issue comment:*),Bash(gh issue edit:*)"
