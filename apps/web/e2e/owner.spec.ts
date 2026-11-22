@@ -38,7 +38,13 @@ const bookAsGuest = async (
   const booked = await fetch(`${api}/bookings`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ eventTypeId, start: slot?.start, guestName, guestEmail, topic }),
+    body: JSON.stringify({
+      eventTypeId,
+      start: slot?.start,
+      guestName,
+      guestEmail,
+      meeting_topic: topic,
+    }),
   });
   expect(booked.status).toBe(201);
   return intervalLabel(slot?.start ?? "", slot?.end ?? "");

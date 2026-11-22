@@ -129,7 +129,7 @@ const booking = {
   start: ten,
   guestName: "Анна",
   guestEmail: "anna@example.com",
-  topic: "Обсудить план проекта",
+  meeting_topic: "Обсудить план проекта",
 };
 
 const appWith = async (...eventTypes: Array<typeof hour>) => (await ownerApp({ eventTypes })).app;
@@ -149,15 +149,15 @@ it("Guest books a free Slot and gets the Booking back without an id", async () =
     "eventTypeId",
     "guestEmail",
     "guestName",
+    "meeting_topic",
     "start",
-    "topic",
   ]);
   expect(body.eventTypeId).toBe("hour");
   expect(new Date(body.start ?? "").toISOString()).toBe(ten);
   expect(new Date(body.end ?? "").toISOString()).toBe("2026-11-16T10:00:00.000Z");
   expect(body.guestName).toBe("Анна");
   expect(body.guestEmail).toBe("anna@example.com");
-  expect(body.topic).toBe("Обсудить план проекта");
+  expect(body.meeting_topic).toBe("Обсудить план проекта");
 });
 
 it("shows a booked Slot as busy without the Guest's name or email", async () => {
@@ -214,9 +214,9 @@ it("rejects booking the same Slot twice as a conflict", async () => {
 it("rejects an invalid topic as a data error before the conflict check", async () => {
   const app = await appWith(hour);
   expect((await book(app, booking)).statusCode).toBe(201);
-  const { topic: _topic, ...withoutTopic } = booking;
+  const { meeting_topic: _topic, ...withoutTopic } = booking;
 
-  for (const payload of [withoutTopic, { ...booking, topic: "" }]) {
+  for (const payload of [withoutTopic, { ...booking, meeting_topic: "" }]) {
     const res = await book(app, payload);
     expect({ payload, status: res.statusCode, body: res.json() }).toEqual({
       payload,
@@ -328,12 +328,20 @@ it("rejects Booking fields outside the limits as a data error", async () => {
     { ...booking, guestEmail: "a@b@example.com" },
     { ...booking, guestEmail: `${"a".repeat(243)}@example.com` },
     { ...booking, start: "завтра" },
-    { eventTypeId: "hour", start: ten, guestName: "Анна", topic: "Тема" },
-    { eventTypeId: "hour", start: ten, guestEmail: "anna@example.com", topic: "Тема" },
+    { eventTypeId: "hour", start: ten, guestName: "Анна", meeting_topic: "Тема" },
+    { eventTypeId: "hour", start: ten, guestEmail: "anna@example.com", meeting_topic: "Тема" },
     { eventTypeId: "hour", start: ten, guestName: "Анна", guestEmail: "anna@example.com" },
-    { ...booking, topic: "" },
-    { ...booking, topic: "т".repeat(501) },
-    { ...booking, topic: 42 },
+    { ...booking, meeting_topic: "" },
+    { ...booking, meeting_topic: "т".repeat(501) },
+    { ...booking, meeting_topic: 42 },
+    // The old field name is not accepted in place of the new one.
+    {
+      eventTypeId: "hour",
+      start: ten,
+      guestName: "Анна",
+      guestEmail: "anna@example.com",
+      topic: "Тема",
+    },
   ];
 
   for (const payload of invalid) {
@@ -360,18 +368,18 @@ it("accepts Booking fields at the limit boundaries", async () => {
     ...booking,
     guestName: "н".repeat(120),
     guestEmail: `${"a".repeat(242)}@example.com`,
-    topic: "т".repeat(500),
+    meeting_topic: "т".repeat(500),
   });
 
   expect(res.statusCode).toBe(201);
-  expect((res.json() as { topic: string }).topic).toBe("т".repeat(500));
+  expect((res.json() as { meeting_topic: string }).meeting_topic).toBe("т".repeat(500));
 });
 
 it("accepts a one-character topic and returns it exactly as sent", async () => {
   const app = await appWith(hour);
 
-  const res = await book(app, { ...booking, topic: "?" });
+  const res = await book(app, { ...booking, meeting_topic: "?" });
 
   expect(res.statusCode).toBe(201);
-  expect((res.json() as { topic: string }).topic).toBe("?");
+  expect((res.json() as { meeting_topic: string }).meeting_topic).toBe("?");
 });

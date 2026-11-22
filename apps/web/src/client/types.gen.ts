@@ -13,7 +13,7 @@ export type Booking = {
     end: string;
     guestName: string;
     guestEmail: string;
-    topic: string;
+    meeting_topic: string;
 };
 
 export type CreateBooking = {
@@ -30,7 +30,7 @@ export type CreateBooking = {
     /**
      * What the Guest wants to talk about; stored and returned exactly as sent.
      */
-    topic: string;
+    meeting_topic: string;
 };
 
 export type CreateEventType = {
@@ -65,7 +65,7 @@ export type OwnerBooking = {
     end: string;
     guestName: string;
     guestEmail: string;
-    topic: string;
+    meeting_topic: string;
 };
 
 /**

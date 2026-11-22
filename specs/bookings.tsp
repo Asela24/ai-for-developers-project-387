@@ -28,7 +28,7 @@ model CreateBooking {
   /** What the Guest wants to talk about; stored and returned exactly as sent. */
   @minLength(1)
   @maxLength(500)
-  topic: string;
+  meeting_topic: string;
 }
 
 /** What the Guest gets back on create: no id, so nothing to delete the Booking with. */
@@ -38,7 +38,7 @@ model Booking {
   end: utcDateTime;
   guestName: string;
   guestEmail: string;
-  topic: string;
+  meeting_topic: string;
 }
 
 /** A Booking as the Owner reads it, with the id that deletes it. */

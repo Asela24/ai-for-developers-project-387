@@ -48,7 +48,7 @@ test("Guest sees the conflict phrase when the Slot was taken while filling the f
       start,
       guestName: "Дина",
       guestEmail: "dina@example.com",
-      topic: "Сроки оплаты",
+      meeting_topic: "Сроки оплаты",
     }),
   });
   expect(taken.status).toBe(201);

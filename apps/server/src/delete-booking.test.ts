@@ -13,7 +13,7 @@ const anya = {
   start: ten,
   guestName: "Аня",
   guestEmail: "anya@example.com",
-  topic: "Обсудить план проекта",
+  meeting_topic: "Обсудить план проекта",
 };
 
 // The create response carries no id: the Owner takes it from the Owner list.

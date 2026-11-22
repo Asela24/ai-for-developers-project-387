@@ -5,7 +5,7 @@ type BookingRequest = Interval & {
   eventTypeId: string;
   guestName: string;
   guestEmail: string;
-  topic: string;
+  meeting_topic: string;
 };
 
 /** A reserved Booking; `id` is assigned by the store and never changes. */

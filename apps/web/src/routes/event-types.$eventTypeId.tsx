@@ -104,7 +104,7 @@ function EventTypeView() {
     event.preventDefault();
     if (!chosen) return;
     const result = await createBooking({
-      body: { eventTypeId, start: chosen.start, guestName, guestEmail, topic },
+      body: { eventTypeId, start: chosen.start, guestName, guestEmail, meeting_topic: topic },
     });
     if (result.data) {
       setBooked(result.data);
