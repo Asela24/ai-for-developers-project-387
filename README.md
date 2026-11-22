@@ -94,6 +94,27 @@ docker run --rm -e PORT=8080 -p 8080:8080 easybook
 @claude /implement-spec #12
 ```
 
+### GitHub App
+
+На репозиторий установлено [Claude GitHub App](https://github.com/apps/claude). Воркфлоу обменивает OIDC-токен прогона на короткоживущий токен приложения. Этот токен действует только в этом репозитории и только до конца прогона. От имени `claude[bot]` агент комментирует, пушит ветки и работает с issues. Собственный `GITHUB_TOKEN` прогона остаётся только на чтение.
+
+### Отличие от OpenCode
+
+Сначала в проекте был агент [OpenCode](https://opencode.ai/docs/github/) (`.github/workflows/opencode.yml`, issue #1). Его заменил Claude Code с теми же сценариями: ответы в issue/PR и скиллы `to-spec` → `to-tickets` → `implement-spec`. Различия:
+
+| | OpenCode (было) | Claude Code (сейчас) |
+| --- | --- | --- |
+| Команда | `/oc`, `/opencode` | `@claude` |
+| GitHub App | OpenCode App | Claude GitHub App (`claude[bot]`) |
+| Модель | `opencode/big-pickle` | `claude-opus-5-5` |
+| Ключ в Secrets | `OPENCODE_API_KEY` | `CLAUDE_CODE_OAUTH_TOKEN` (подписка Claude) |
+| Инструкции проекта | читает `AGENTS.md` напрямую | читает `CLAUDE.md`, который подключает `AGENTS.md` |
+| Скиллы | из окружения агента | закоммичены в `.claude/skills/`, поэтому есть на свежем раннере |
+| Права агента | полный набор инструментов | только явно разрешённые команды (`gh`, `pnpm`, `mise run`, `git`) |
+| Результат | сам открывает PR | пушит ветку `claude/…` и даёт ссылку на создание PR |
+| Share | может публиковать ссылку на сессию | публичных ссылок нет, лог только в Actions |
+| PR из форков | не проверялись | отклоняются до использования секретов |
+
 ---
 
 <details>
