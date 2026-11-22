@@ -8,7 +8,7 @@ type ListedBooking = {
   end: string;
   guestName: string;
   guestEmail: string;
-  meeting_topic: string;
+  bookingTopic: string;
 };
 
 const intro = {
@@ -30,7 +30,7 @@ const anya = {
   start: "2026-11-16T09:00:00.000Z", // 16 Nov 10:00–11:00 Belgrade
   guestName: "Аня",
   guestEmail: "anya@example.com",
-  meeting_topic: "Обсудить план проекта\nи сроки",
+  bookingTopic: "Обсудить план проекта\nи сроки",
 };
 
 const boris = {
@@ -38,7 +38,7 @@ const boris = {
   start: "2026-11-17T13:00:00.000Z", // 17 Nov 14:00–14:30 Belgrade
   guestName: "Борис",
   guestEmail: "boris@example.com",
-  meeting_topic: "Разобрать ошибку в отчёте",
+  bookingTopic: "Разобрать ошибку в отчёте",
 };
 
 const bookedApp = () => ownerApp({ eventTypes: [intro, review], bookings: [boris, anya] });
@@ -69,7 +69,7 @@ it("lists Upcoming Bookings of every Event type with name, email, topic, type an
       end: "2026-11-16T10:00:00.000Z",
       guestName: "Аня",
       guestEmail: "anya@example.com",
-      meeting_topic: "Обсудить план проекта\nи сроки",
+      bookingTopic: "Обсудить план проекта\nи сроки",
     },
     {
       id: expect.any(String),
@@ -78,7 +78,7 @@ it("lists Upcoming Bookings of every Event type with name, email, topic, type an
       end: "2026-11-17T13:30:00.000Z",
       guestName: "Борис",
       guestEmail: "boris@example.com",
-      meeting_topic: "Разобрать ошибку в отчёте",
+      bookingTopic: "Разобрать ошибку в отчёте",
     },
   ]);
 });

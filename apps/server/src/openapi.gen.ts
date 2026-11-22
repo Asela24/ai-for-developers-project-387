@@ -100,7 +100,7 @@ export interface components {
             end: string;
             guestName: string;
             guestEmail: string;
-            meeting_topic: string;
+            bookingTopic: string;
         };
         CreateBooking: {
             eventTypeId: string;
@@ -113,7 +113,7 @@ export interface components {
             /** @description One `@` with text on both sides. */
             guestEmail: string;
             /** @description What the Guest wants to talk about; stored and returned exactly as sent. */
-            meeting_topic: string;
+            bookingTopic: string;
         };
         CreateEventType: {
             id: string;
@@ -145,7 +145,7 @@ export interface components {
             end: string;
             guestName: string;
             guestEmail: string;
-            meeting_topic: string;
+            bookingTopic: string;
         };
         /** @description A start offered for one Event type. A busy Slot carries no Guest identity. */
         Slot: {

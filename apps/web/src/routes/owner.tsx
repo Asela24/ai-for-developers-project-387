@@ -219,7 +219,7 @@ function OwnerPage() {
                 <div className="min-w-0 space-y-0.5 text-sm">
                   <p className="font-medium">{booking.guestName}</p>
                   <p className="text-muted-foreground">{booking.guestEmail}</p>
-                  <p className="whitespace-pre-line break-words">{booking.meeting_topic}</p>
+                  <p className="whitespace-pre-line break-words">{booking.bookingTopic}</p>
                   <p className="text-muted-foreground">
                     <span className="text-foreground">{typeName(booking.eventTypeId)}</span>
                     {` · ${interval(booking)}`}

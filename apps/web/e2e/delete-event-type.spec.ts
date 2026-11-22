@@ -43,7 +43,7 @@ test("an Event type the Owner deleted with its Bookings is gone from the Guest p
       start: free[Math.floor(free.length / 4)]?.start,
       guestName: "Глеб",
       guestEmail: "gleb@example.com",
-      meeting_topic: "Стратегия на квартал",
+      bookingTopic: "Стратегия на квартал",
     }),
   });
   expect(booked.status).toBe(201);

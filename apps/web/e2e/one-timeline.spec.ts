@@ -34,7 +34,7 @@ test("a Slot booked through another Event type shows as busy", async ({ page }) 
       start,
       guestName: "Анна",
       guestEmail: "anna@example.com",
-      meeting_topic: "Первый день в команде",
+      bookingTopic: "Первый день в команде",
     }),
   });
   expect(booked.status).toBe(201);

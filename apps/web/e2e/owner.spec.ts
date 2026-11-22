@@ -43,7 +43,7 @@ const bookAsGuest = async (
       start: slot?.start,
       guestName,
       guestEmail,
-      meeting_topic: topic,
+      bookingTopic: topic,
     }),
   });
   expect(booked.status).toBe(201);

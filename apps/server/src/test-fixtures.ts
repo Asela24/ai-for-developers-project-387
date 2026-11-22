@@ -11,7 +11,7 @@ type BookingPayload = {
   start: string;
   guestName: string;
   guestEmail: string;
-  meeting_topic: string;
+  bookingTopic: string;
 };
 
 // 2026-11-15 08:00 Europe/Belgrade (UTC+1), before working hours, so the whole grid is offered.
