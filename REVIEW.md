@@ -52,7 +52,15 @@ Report each finding once, on the line it is about, with its level and a concrete
 - Commits follow Conventional Commits and implementation commits carry a `Refs #N` footer.
 - The PR description fills in [`.github/pull_request_template.md`](.github/pull_request_template.md) for this change: checks actually run (ticked only if the diff or CI supports it), risk level with what can break, and a rollback path. Placeholders left in place are a 🟡.
 
-## 7. Maintainability
+## 7. Scenarios and evidence
+
+The scenarios are chosen in the agreed spec, and `.github/workflows/verify.yml` checks them in a separate CI job without the model secret. The reviewer checks the choice and reads the evidence. It does not run the scenarios itself.
+
+- A `fix:` or `feat:` PR names its spec (`Спецификация: #N`). The main and adjacent scenarios in the PR match the spec's `## Verification Scenarios`, and the diff adds or extends the main scenario's e2e test. A missing spec, or scenarios that differ from it, are a 🔴. «Спецификация: нет» is fine only for docs and CI changes.
+- **Bug fix:** the main test fails on the base commit and passes after the fix, and the adjacent one passes on both. **New feature:** the main test fails without the new behaviour and passes with it. Check that the test asserts the behaviour itself, so it fails on base for the right reason and not because of a typo or a missing selector.
+- **Evidence:** the `verify` run for the current head SHA and its artifact `verification-pr<N>-<sha>`. Report its state as you find it: `pass`, `fail`, `not applicable`, or still running / not started. This review runs in parallel with CI, so the artifact may not exist yet. Then say so instead of guessing, and leave the check to the human, who compares the artifact SHA with the current head before merging. An artifact for an older SHA proves nothing about this version.
+
+## 8. Maintainability
 
 - Simple over clever; no dead code, unused exports or speculative abstractions.
 - Names say what things are in domain terms; comments explain why, not what.
@@ -64,4 +72,5 @@ End the review with one summary comment:
 
 - **Verdict:** ✅ ready to merge, 💬 merge after "should fix" items are addressed or answered, or ⛔ blockers found.
 - Counts per level and a one-line list of the blockers.
+- The `verify` evidence state for the current head SHA (section 7).
 - What was not reviewed (for example, large generated files) so a human knows where to look.
