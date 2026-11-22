@@ -12,10 +12,13 @@ jobs:
     name: Independent review against REVIEW.md
     # Ready PRs from this repository only. Drafts wait for ready_for_review.
     # Fork PRs get no secrets on pull_request, so they are skipped instead of
-    # failing.
+    # failing. Only PRs opened by the repository owner or the OpenCode agent
+    # spend the Claude token.
     if: >-
       !github.event.pull_request.draft &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (github.event.pull_request.user.login == github.repository_owner ||
+       github.event.pull_request.user.login == 'opencode-agent[bot]')
     # One review per PR. A new push makes the running review stale, so it is
     # cancelled and the new head is reviewed instead. Set on the job, so
     # skipped runs (drafts) never cancel a real review.
@@ -45,8 +48,9 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Pushes by @claude to a claude/… branch trigger synchronize with
-          # claude[bot] as the actor; those PRs need review most of all.
-          allowed_bots: "claude"
+          # claude[bot] as the actor; PRs opened by opencode-agent[bot] run
+          # with it as the actor. Without this the action refuses bot actors.
+          allowed_bots: "claude,opencode-agent"
           track_progress: true
           prompt: |
             REPO: ${{ github.repository }}
