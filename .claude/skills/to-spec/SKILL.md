@@ -13,7 +13,7 @@ The issue tracker and triage label vocabulary should have been provided to you. 
 
 2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better - the ideal number is one.
 
-Check with the user that these seams match their expectations.
+Check with the user that these seams match their expectations, and pick the main and adjacent e2e scenarios for the Verification Scenarios section.
 
 3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
 
@@ -62,6 +62,15 @@ A list of testing decisions that were made. Include:
 - A description of what makes a good test (only test external behavior, not implementation details)
 - Which modules will be tested
 - Prior art for the tests (i.e. similar types of tests in the codebase)
+
+## Verification Scenarios
+
+The two Playwright e2e scenarios an independent check runs on the PR (`.github/workflows/verify.yml`), given by exact test title. Keep this exact format, the check parses it:
+
+- Main: `<title of the e2e test for the new behaviour or the fixed bug>`
+- Adjacent: `<title of an existing e2e test for the closest neighbouring behaviour that must keep working>`
+
+The main scenario may be a new test or an existing one extended for this change. For a bug fix it must fail on the base commit and pass after the fix, and the adjacent one must pass on both. For a new feature the main scenario must fail without the new behaviour and pass with it.
 
 ## Out of Scope
 
