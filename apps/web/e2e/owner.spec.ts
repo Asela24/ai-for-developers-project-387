@@ -68,7 +68,7 @@ test("Owner creates an Event type, sees and deletes its Bookings, then deletes t
   await expect(page.getByRole("alert")).toHaveText("Проверьте данные и попробуйте ещё раз.");
   await expect(types.getByText("Повтор")).toHaveCount(0);
 
-  // The description may be empty (spec #6).
+  // The description may be empty (spec https://github.com/Asela24/ai-for-developers-project-386/issues/6).
   await form.getByLabel("Id", { exact: true }).fill("owner-no-description");
   await form.getByLabel("Название").fill("Без описания");
   await form.getByLabel("Описание").fill("");

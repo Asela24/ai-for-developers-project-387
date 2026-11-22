@@ -14,7 +14,7 @@ it("renders the home page in the glossary's words", async () => {
   );
   expect(screen.getByRole("link", { name: "Owner" })).toHaveAttribute("href", "/owner");
   // GLOSSARY.md: no calendar, call, meeting, or запись; no Booking notes either.
-  // The verb «Записаться» is the button text ticket #16 names, so only it is let through.
+  // The verb «Записаться» is the button text ticket https://github.com/Asela24/ai-for-developers-project-386/issues/16 names, so only it is let through.
   expect(container.textContent).not.toMatch(
     /календар|calendar|звон|встреч|запис(?!аться)|замет|брон[ьи]\b/i,
   );

@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
+Issues and specs for this repo live as GitHub issues in [`Asela24/ai-for-developers-project-387`](https://github.com/Asela24/ai-for-developers-project-387/issues). Use the `gh` CLI for all operations.
 
 ## Conventions
 
@@ -12,7 +12,22 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 - **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
 - **Close**: `gh issue close <number> --comment "..."`
 
-Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
+`gh` targets `Asela24/ai-for-developers-project-387` automatically inside this clone. Pass `-R Asela24/ai-for-developers-project-387` when running outside it.
+
+## First project: spec and decisions
+
+This code was carried over from [`Asela24/ai-for-developers-project-386`](https://github.com/Asela24/ai-for-developers-project-386). Its tracker holds the original spec and the decisions behind it. Read them there (`gh issue view <n> -R Asela24/ai-for-developers-project-386 --comments`); don't recreate them here, and file new work in this repo.
+
+- **Spec**: [#6 EasyBook: бронирование времени Owner и Guest без логина](https://github.com/Asela24/ai-for-developers-project-386/issues/6)
+- **Decisions map**: [#1 Контракты EasyBook: решения до TypeSpec](https://github.com/Asela24/ai-for-developers-project-386/issues/1), resolved by
+  [#2](https://github.com/Asela24/ai-for-developers-project-386/issues/2) Booking after its interval starts,
+  [#3](https://github.com/Asela24/ai-for-developers-project-386/issues/3) field limits for Event type and Booking,
+  [#4](https://github.com/Asela24/ai-for-developers-project-386/issues/4) failures the contract names,
+  [#5](https://github.com/Asela24/ai-for-developers-project-386/issues/5) what Guest gets after creating a Booking
+- **Implemented tickets**: [#7](https://github.com/Asela24/ai-for-developers-project-386/issues/7), [#8](https://github.com/Asela24/ai-for-developers-project-386/issues/8), [#9](https://github.com/Asela24/ai-for-developers-project-386/issues/9), [#10](https://github.com/Asela24/ai-for-developers-project-386/issues/10), [#11](https://github.com/Asela24/ai-for-developers-project-386/issues/11), [#12](https://github.com/Asela24/ai-for-developers-project-386/issues/12), [#13](https://github.com/Asela24/ai-for-developers-project-386/issues/13), [#14](https://github.com/Asela24/ai-for-developers-project-386/issues/14), [#16](https://github.com/Asela24/ai-for-developers-project-386/issues/16), [#20](https://github.com/Asela24/ai-for-developers-project-386/issues/20)
+- **Pull requests**: [#15](https://github.com/Asela24/ai-for-developers-project-386/pull/15), [#17](https://github.com/Asela24/ai-for-developers-project-386/pull/17), [#18](https://github.com/Asela24/ai-for-developers-project-386/pull/18), [#21](https://github.com/Asela24/ai-for-developers-project-386/pull/21), [#22](https://github.com/Asela24/ai-for-developers-project-386/pull/22)
+
+A bare `#N` in code, comments or docs carried over from that project means an issue in `ai-for-developers-project-386`, not this repo. New references to it use the full URL.
 
 ## Pull requests as a triage surface
 

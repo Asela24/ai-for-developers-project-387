@@ -42,7 +42,7 @@ Change the source, then regenerate. Edit these files only through their generato
 
 ### Issue tracker
 
-GitHub Issues of this repo, via `gh`. See `docs/agents/issue-tracker.md`.
+GitHub Issues of [`Asela24/ai-for-developers-project-387`](https://github.com/Asela24/ai-for-developers-project-387/issues), via `gh`. The original spec and decisions live in the first project, [`ai-for-developers-project-386`](https://github.com/Asela24/ai-for-developers-project-386/issues). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
