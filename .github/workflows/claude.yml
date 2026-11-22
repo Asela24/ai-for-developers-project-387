@@ -9,11 +9,6 @@ on:
 # The job is the only consumer of these permissions.
 permissions: {}
 
-# Serialize runs per issue/PR so two agents never work on the same task.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}
-  cancel-in-progress: false
-
 jobs:
   claude:
     name: Respond to @claude comment
@@ -25,6 +20,12 @@ jobs:
        github.event.comment.author_association == 'MEMBER' ||
        github.event.comment.author_association == 'COLLABORATOR') &&
       contains(github.event.comment.body, '@claude')
+    # One agent at a time across the repository; a new request waits for the
+    # running one. Set on the job, not the workflow, so comments without
+    # @claude (skipped runs) never take the queue slot from a real request.
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
