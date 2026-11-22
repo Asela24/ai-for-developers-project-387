@@ -108,11 +108,11 @@ docker run --rm -e PORT=8080 -p 8080:8080 easybook
 
 Воркфлоу [`.github/workflows/claude-review.yml`](.github/workflows/claude-review.yml) запускается событием `pull_request` (`opened`, `synchronize`, `reopened`, `ready_for_review`), без комментария. Ревьюер независим от автора PR, будь то человек или `@claude`: это отдельная сессия, которая видит только diff, код и критерии из [`REVIEW.md`](REVIEW.md), а не переписку автора. Замечания он оставляет inline с уровнем (🔴 блокер, 🟡 стоит исправить, 🟢 мелочь) и заканчивает итоговым комментарием с вердиктом. PR не одобряет и изменений не запрашивает: решение о мерже остаётся за человеком.
 
-- **Чьи PR проверяются:** только открытые владельцем репозитория или `opencode-agent[bot]`. PR других авторов токен Claude не тратят.
+- **Чьи PR проверяются:** только открытые владельцем репозитория или `claude[bot]`. PR других авторов токен Claude не тратят.
 - **Что пропускается:** черновики (ревью начнётся на `ready_for_review`) и PR из форков (на `pull_request` им не дают секретов).
 - **Отмена устаревшего ревью:** одно ревью на PR (`concurrency` по номеру PR, `cancel-in-progress: true`). Новый пуш отменяет идущее ревью, и проверяется уже новый head.
 - **Тайм-аут:** 20 минут.
-- **Права:** `GITHUB_TOKEN` только на чтение (`contents: read`, `pull-requests: read`), `id-token: write` для токена Claude GitHub App, от имени которого публикуются комментарии.
+- **Права:** `GITHUB_TOKEN` только на чтение (`contents`, `pull-requests`, `issues`, `actions`, `checks`, `statuses`: `read`), `id-token: write` для токена Claude GitHub App, от имени которого публикуются комментарии.
 - **Инструменты агента:** `Read`, `Grep`, `Glob`, `gh pr view/diff/comment` и inline-комментарии. Без `git`, `pnpm` и `mise`, поэтому код PR не выполняется в задаче с токеном Claude.
 - **Повторное ревью** без нового пуша: комментарий `@claude проверь PR по REVIEW.md`.
 
