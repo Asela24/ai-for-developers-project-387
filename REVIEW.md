@@ -50,7 +50,7 @@ Report each finding once, on the line it is about, with its level and a concrete
 - `.github/workflows/hexlet-check.yml` is untouched.
 - No lint rule disabled or check weakened; any exception is narrow and commented.
 - Commits follow Conventional Commits and implementation commits carry a `Refs #N` footer.
-- The PR description fills in the template: checks run, risk, rollback.
+- The PR description fills in [`.github/pull_request_template.md`](.github/pull_request_template.md) for this change: checks actually run (ticked only if the diff or CI supports it), risk level with what can break, and a rollback path. Placeholders left in place are a 🟡.
 
 ## 7. Maintainability
 
