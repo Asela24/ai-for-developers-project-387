@@ -8,6 +8,7 @@ type ListedBooking = {
   end: string;
   guestName: string;
   guestEmail: string;
+  topic: string;
 };
 
 const intro = {
@@ -29,6 +30,7 @@ const anya = {
   start: "2026-11-16T09:00:00.000Z", // 16 Nov 10:00–11:00 Belgrade
   guestName: "Аня",
   guestEmail: "anya@example.com",
+  topic: "Обсудить план проекта\nи сроки",
 };
 
 const boris = {
@@ -36,6 +38,7 @@ const boris = {
   start: "2026-11-17T13:00:00.000Z", // 17 Nov 14:00–14:30 Belgrade
   guestName: "Борис",
   guestEmail: "boris@example.com",
+  topic: "Разобрать ошибку в отчёте",
 };
 
 const bookedApp = () => ownerApp({ eventTypes: [intro, review], bookings: [boris, anya] });
@@ -53,7 +56,7 @@ const upcoming = async (app: Injector) => {
     .toSorted((a, b) => a.guestName.localeCompare(b.guestName));
 };
 
-it("lists Upcoming Bookings of every Event type with name, email, type and interval", async () => {
+it("lists Upcoming Bookings of every Event type with name, email, topic, type and interval", async () => {
   const { app } = await bookedApp();
 
   const bookings = await upcoming(app);
@@ -66,6 +69,7 @@ it("lists Upcoming Bookings of every Event type with name, email, type and inter
       end: "2026-11-16T10:00:00.000Z",
       guestName: "Аня",
       guestEmail: "anya@example.com",
+      topic: "Обсудить план проекта\nи сроки",
     },
     {
       id: expect.any(String),
@@ -74,6 +78,7 @@ it("lists Upcoming Bookings of every Event type with name, email, type and inter
       end: "2026-11-17T13:30:00.000Z",
       guestName: "Борис",
       guestEmail: "boris@example.com",
+      topic: "Разобрать ошибку в отчёте",
     },
   ]);
 });

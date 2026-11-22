@@ -37,6 +37,7 @@ test("Guest sees the conflict phrase when the Slot was taken while filling the f
   await page.getByRole("button", { name: "Продолжить" }).click();
   await page.getByLabel("Имя").fill("Глеб");
   await page.getByLabel("Почта").fill("gleb@example.com");
+  await page.getByLabel("Тема разговора").fill("Условия договора");
 
   // Another Guest takes the same Slot before this one submits.
   const taken = await fetch(`${api}/bookings`, {
@@ -47,6 +48,7 @@ test("Guest sees the conflict phrase when the Slot was taken while filling the f
       start,
       guestName: "Дина",
       guestEmail: "dina@example.com",
+      topic: "Сроки оплаты",
     }),
   });
   expect(taken.status).toBe(201);

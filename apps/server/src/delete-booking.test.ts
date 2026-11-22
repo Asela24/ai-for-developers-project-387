@@ -8,7 +8,13 @@ const ten = "2026-11-16T09:00:00.000Z";
 // 16 Nov 10:30–11:00 Belgrade, inside the 10:00 Booking.
 const tenThirty = "2026-11-16T09:30:00.000Z";
 
-const anya = { eventTypeId: "hour", start: ten, guestName: "Аня", guestEmail: "anya@example.com" };
+const anya = {
+  eventTypeId: "hour",
+  start: ten,
+  guestName: "Аня",
+  guestEmail: "anya@example.com",
+  topic: "Обсудить план проекта",
+};
 
 // The create response carries no id: the Owner takes it from the Owner list.
 const appWithAnya = async () => {

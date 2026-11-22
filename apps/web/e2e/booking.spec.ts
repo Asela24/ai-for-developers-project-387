@@ -4,7 +4,11 @@ import { apiPort } from "./ports";
 
 const api = `http://127.0.0.1:${apiPort}`;
 
-test("Guest books a free Slot and the Owner sees it in the upcoming Bookings", async ({ page }) => {
+const topic = "Хочу разобрать архитектуру\nи план релиза";
+
+test("Guest books a free Slot with a topic and the Owner sees it in the upcoming Bookings", async ({
+  page,
+}) => {
   const created = await fetch(`${api}/event-types`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -63,6 +67,16 @@ test("Guest books a free Slot and the Owner sees it in the upcoming Bookings", a
 
   await page.getByLabel("Имя").fill("Лидия");
   await page.getByLabel("Почта").fill("lidia@example.com");
+  const topicField = page.getByLabel("Тема разговора");
+  await expect(topicField).toHaveAttribute("required", "");
+  await expect(topicField).toHaveAttribute("maxlength", "500");
+  await topicField.fill(topic);
+
+  // The typed details survive a trip back to the Slot step.
+  await page.getByRole("button", { name: "Назад" }).click();
+  await page.getByRole("button", { name: "Продолжить" }).click();
+  await expect(page.getByLabel("Тема разговора")).toHaveValue(topic);
+
   await page.getByRole("button", { name: "Забронировать" }).click();
 
   // The confirmation is a screen of its own: the calendar, Slots and form are gone.
@@ -77,7 +91,15 @@ test("Guest books a free Slot and the Owner sees it in the upcoming Bookings", a
   await openDay(page, dayName);
   await expect(slotList(page).getByRole("button", { name: `${time} занято` })).toBeDisabled();
 
-  // The Owner sees the Guest’s Booking in the upcoming list.
+  // The next Booking starts from an empty form.
+  await slotList(page)
+    .getByRole("button", { name: /^\d{2}:\d{2}$/ })
+    .first()
+    .click();
+  await page.getByRole("button", { name: "Продолжить" }).click();
+  await expect(page.getByLabel("Тема разговора")).toHaveValue("");
+
+  // The Owner sees the Guest’s Booking in the upcoming list, the topic under name and email.
   await page.goto("/");
   await page.getByRole("link", { name: "Owner" }).click();
   const upcoming = page.getByRole("region", { name: "Предстоящие бронирования" });
@@ -85,4 +107,9 @@ test("Guest books a free Slot and the Owner sees it in the upcoming Bookings", a
   await expect(booking).toContainText("Лидия");
   await expect(booking).toContainText("Разбор");
   await expect(booking).toContainText(`${dayName}, ${time}`);
+  const shownTopic = booking.getByText("Хочу разобрать архитектуру");
+  await expect(shownTopic).toHaveText(topic);
+  await expect(shownTopic).toHaveCSS("white-space", "pre-line");
+  const lines = await booking.locator("p").allInnerTexts();
+  expect(lines.indexOf(topic)).toBe(lines.indexOf("lidia@example.com") + 1);
 });

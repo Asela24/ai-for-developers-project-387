@@ -216,9 +216,10 @@ function OwnerPage() {
                 key={booking.id}
                 className="flex flex-wrap items-center justify-between gap-3 py-4"
               >
-                <div className="space-y-0.5 text-sm">
+                <div className="min-w-0 space-y-0.5 text-sm">
                   <p className="font-medium">{booking.guestName}</p>
                   <p className="text-muted-foreground">{booking.guestEmail}</p>
+                  <p className="whitespace-pre-line break-words">{booking.topic}</p>
                   <p className="text-muted-foreground">
                     <span className="text-foreground">{typeName(booking.eventTypeId)}</span>
                     {` · ${interval(booking)}`}

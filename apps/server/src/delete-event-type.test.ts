@@ -20,6 +20,7 @@ const anyaIntro = {
   start: "2026-11-16T09:00:00.000Z", // 16 Nov 10:00–11:00 Belgrade
   guestName: "Аня",
   guestEmail: "anya@example.com",
+  topic: "Обсудить план проекта",
 };
 
 const borisReview = {
@@ -27,6 +28,7 @@ const borisReview = {
   start: "2026-11-17T13:00:00.000Z", // 17 Nov 14:00–14:30 Belgrade
   guestName: "Борис",
   guestEmail: "boris@example.com",
+  topic: "Разобрать ошибку в отчёте",
 };
 
 const bookedApp = () =>

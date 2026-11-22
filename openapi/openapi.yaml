@@ -170,6 +170,7 @@ components:
         - end
         - guestName
         - guestEmail
+        - topic
       properties:
         eventTypeId:
           type: string
@@ -183,6 +184,8 @@ components:
           type: string
         guestEmail:
           type: string
+        topic:
+          type: string
       description: 'What the Guest gets back on create: no id, so nothing to delete the Booking with.'
     CreateBooking:
       type: object
@@ -191,6 +194,7 @@ components:
         - start
         - guestName
         - guestEmail
+        - topic
       properties:
         eventTypeId:
           type: string
@@ -210,6 +214,11 @@ components:
           maxLength: 254
           pattern: ^[^@]+@[^@]+$
           description: One `@` with text on both sides.
+        topic:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: What the Guest wants to talk about; stored and returned exactly as sent.
     CreateEventType:
       type: object
       required:
@@ -280,6 +289,7 @@ components:
         - end
         - guestName
         - guestEmail
+        - topic
       properties:
         id:
           type: string
@@ -295,6 +305,8 @@ components:
         guestName:
           type: string
         guestEmail:
+          type: string
+        topic:
           type: string
       description: A Booking as the Owner reads it, with the id that deletes it.
     Slot:
