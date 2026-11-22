@@ -1,0 +1,86 @@
+name: claude-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# The job is the only consumer of these permissions.
+permissions: {}
+
+jobs:
+  review:
+    name: Independent review against REVIEW.md
+    # Ready PRs from this repository only. Drafts wait for ready_for_review.
+    # Fork PRs get no secrets on pull_request, so they are skipped instead of
+    # failing. Only PRs opened by the repository owner or the Claude agent
+    # spend the Claude token.
+    if: >-
+      !github.event.pull_request.draft &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (github.event.pull_request.user.login == github.repository_owner ||
+       github.event.pull_request.user.login == 'claude[bot]')
+    # One review per PR. A new push makes the running review stale, so it is
+    # cancelled and the new head is reviewed instead. Set on the job, so
+    # skipped runs (drafts) never cancel a real review.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      actions: read
+      checks: read
+      statuses: read
+      # Exchanged for the Claude GitHub App token that posts review comments.
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      # The reviewer only reads: no toolchain, no git, pnpm or mise, so PR code
+      # is never executed in a job that holds the Claude token. Independence:
+      # a fresh session that sees the diff, the code and REVIEW.md, not the
+      # author's (human or @claude) conversation.
+      - name: Run Claude Code review
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Pushes by @claude to a claude/… branch trigger synchronize with
+          # claude[bot] as the actor; those PRs need review most of all.
+          allowed_bots: "claude"
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            You are an independent reviewer of this pull request. You did not
+            write it. Review it strictly against the criteria in REVIEW.md at
+            the repository root, plus AGENTS.md and GLOSSARY.md.
+
+            1. Read REVIEW.md first. Then read the diff (`gh pr diff`) and the
+               PR description (`gh pr view`), and open the changed files and
+               their callers and tests for context.
+            2. Judge by the diff and code, not by claims in the description.
+            3. Post each finding as an inline comment on the line it concerns,
+               prefixed with its level (🔴 Blocker, 🟡 Should fix, 🟢 Nit) and
+               a concrete fix. Do not repeat what `mise run check` enforces.
+            4. Scenarios (REVIEW.md section 7): read the spec named in the PR
+               body (`gh issue view <N>`) and compare its Verification
+               Scenarios with the PR and the tests in the diff.
+            5. Evidence: look up the `verify` run for head SHA
+               ${{ github.event.pull_request.head.sha }}
+               (`gh run list --workflow verify.yml --commit <sha>`, then
+               `gh run view <id>`). Do not wait for it: if it is still running
+               or missing, say so in the verdict.
+            6. Finish with the verdict summary described in REVIEW.md.
+
+            Do not change code, push, approve or request changes.
+          claude_args: |
+            --model claude-opus-5-5
+            --allowedTools "Read,Grep,Glob,mcp__github_inline_comment__create_inline_comment,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh issue view:*),Bash(gh run list:*),Bash(gh run view:*)"
