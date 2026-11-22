@@ -37,6 +37,57 @@ jobs:
       # Exchanged for the Claude GitHub App token that posts review comments.
       id-token: write
     steps:
+      # Run limit, checked by code before the model is called: at most
+      # REVIEW_RUN_LIMIT reviews per PR. Every earlier run of this workflow for
+      # the PR that started the job counts (finished, failed, cancelled by a
+      # newer push, or refused here); runs skipped by `if` (drafts) don't.
+      # A run belongs to the PR by head branch and time: pull_request runs from
+      # that branch since the PR was opened. The runs' pull_requests field is
+      # not used: GitHub empties it once a PR is closed.
+      # Inline on purpose: the Claude App token is issued only when this file
+      # matches main, so a PR can't loosen the limit, but it could edit a
+      # script in its own branch.
+      - name: Check review run limit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_RUN_LIMIT: 4
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_CREATED: ${{ github.event.pull_request.created_at }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          branch=$(jq -rn --arg b "$HEAD_REF" '$b | @uri')
+          gh api --paginate \
+            "repos/$REPO/actions/workflows/claude-review.yml/runs?event=pull_request&branch=$branch&per_page=100" \
+            --jq ".workflow_runs[]
+              | select(.id != $RUN_ID and .conclusion != \"skipped\")
+              | select(.created_at >= \"$PR_CREATED\")
+              | \"| \(.created_at) | \`\(.head_sha[0:7])\` | \(.conclusion // .status) | \(.html_url) |\"" \
+            >earlier-runs.md
+          used=$(grep -c . earlier-runs.md || true)
+
+          if [ "$used" -ge "$REVIEW_RUN_LIMIT" ]; then
+            reason="Предел авторевью исчерпан: для PR #$PR уже было $used из $REVIEW_RUN_LIMIT запусков, модель не вызывается."
+            echo "::error title=Review run limit reached::$reason SHA: $HEAD_SHA. Логи: $RUN_URL"
+            {
+              echo "## ⛔ Авторевью не запущено"
+              echo
+              echo "- **Причина:** $reason"
+              echo "- **SHA:** \`$HEAD_SHA\`"
+              echo "- **Логи:** $RUN_URL"
+              echo "- **Дальше:** ручное ревью или комментарий \`@claude проверь PR по REVIEW.md\`."
+              echo
+              echo "| Запуск | SHA | Итог | Ссылка |"
+              echo "| --- | --- | --- | --- |"
+              cat earlier-runs.md
+            } >>"$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "Review $((used + 1)) of $REVIEW_RUN_LIMIT for PR #$PR at $HEAD_SHA."
+
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -70,9 +121,14 @@ jobs:
             3. Post each finding as an inline comment on the line it concerns,
                prefixed with its level (🔴 Blocker, 🟡 Should fix, 🟢 Nit) and
                a concrete fix. Do not repeat what `mise run check` enforces.
-            4. Scenarios (REVIEW.md section 7): read the spec named in the PR
-               body (`gh issue view <N>`) and compare its Verification
-               Scenarios with the PR and the tests in the diff.
+            4. Spec (REVIEW.md section 7): find the agreed spec, named in the
+               PR body as `Спецификация: #N` or linked from the ticket in
+               `Refs #N` (`gh issue view <N>`). Compare the result with it item
+               by item: Solution, Implementation Decisions, User Stories,
+               Testing Decisions, Out of Scope, and its Verification Scenarios
+               against the PR and the tests in the diff. The spec is the
+               reference, not the PR description. A fix/feat PR without a spec
+               is a 🔴.
             5. Evidence: look up the `verify` run for head SHA
                ${{ github.event.pull_request.head.sha }}
                (`gh run list --workflow verify.yml --commit <sha>`, then

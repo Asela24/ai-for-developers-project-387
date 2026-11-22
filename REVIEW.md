@@ -16,7 +16,7 @@ Report each finding once, on the line it is about, with its level and a concrete
 
 ## 1. Correctness
 
-- The change does what its ticket (`Refs #N`) asks, and nothing the ticket didn't ask for.
+- The change does what its ticket (`Refs #N`) and the agreed spec ask, and nothing they didn't ask for (section 7).
 - Booking rules hold: Bookings for one Event type don't overlap (intervals are half-open, `start < end`), a Booking starts on an offered Slot inside the booking window, and only Upcoming Bookings are listed.
 - Edge cases: empty input, boundaries (exactly at window start/end, back-to-back Bookings), time zones (everything is UTC on the wire), concurrent requests.
 - Errors return the status and body the contract declares, not a bare 500.
@@ -52,9 +52,15 @@ Report each finding once, on the line it is about, with its level and a concrete
 - Commits follow Conventional Commits and implementation commits carry a `Refs #N` footer.
 - The PR description fills in [`.github/pull_request_template.md`](.github/pull_request_template.md) for this change: checks actually run (ticked only if the diff or CI supports it), risk level with what can break, and a rollback path. Placeholders left in place are a 🟡.
 
-## 7. Scenarios and evidence
+## 7. Spec, scenarios and evidence
 
-The scenarios are chosen in the agreed spec, and `.github/workflows/verify.yml` checks them in a separate CI job without the model secret. The reviewer checks the choice and reads the evidence. It does not run the scenarios itself.
+The agreed spec in GitHub Issues is the reference the result is checked against: the PR names it (`Спецификация: #N`), or the ticket from `Refs #N` links it (`спека: #N`). The scenarios are chosen in that spec, and `.github/workflows/verify.yml` checks them in a separate CI job without the model secret. The reviewer compares the result with the spec and reads the evidence. It does not run the scenarios itself.
+
+- **Conformance:** read the whole spec and compare it with the diff, item by item:
+  - **Solution** and **Implementation Decisions:** each decision is implemented as written (fields, limits, error codes, where things appear in the UI, what is reused). A deviation is a 🔴 unless the PR explains it and the spec was updated.
+  - **User Stories:** every story the ticket covers is implemented and observable. List the ones you couldn't find in the diff.
+  - **Testing Decisions:** the tests go through the seams the spec chose and cover the cases it lists.
+  - **Out of Scope:** nothing listed there was implemented. Scope creep is a 🟡, or a 🔴 when it changes the contract.
 
 - A `fix:` or `feat:` PR names its spec (`Спецификация: #N`). The main and adjacent scenarios in the PR match the spec's `## Verification Scenarios`, and the diff adds or extends the main scenario's e2e test. A missing spec, or scenarios that differ from it, are a 🔴. «Спецификация: нет» is fine only for docs and CI changes.
 - **Bug fix:** the main test fails on the base commit and passes after the fix, and the adjacent one passes on both. **New feature:** the main test fails without the new behaviour and passes with it. Check that the test asserts the behaviour itself, so it fails on base for the right reason and not because of a typo or a missing selector.
@@ -72,5 +78,6 @@ End the review with one summary comment:
 
 - **Verdict:** ✅ ready to merge, 💬 merge after "should fix" items are addressed or answered, or ⛔ blockers found.
 - Counts per level and a one-line list of the blockers.
+- Spec conformance: the spec number, decisions or stories that are missing or deviate, or «соответствует спецификации».
 - The `verify` evidence state for the current head SHA (section 7).
 - What was not reviewed (for example, large generated files) so a human knows where to look.
