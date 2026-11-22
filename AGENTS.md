@@ -52,10 +52,19 @@ Every PR follows `.github/pull_request_template.md`. When you finish a change, f
 
 - **Что и зачем:** what changed and why, in `GLOSSARY.md` terms, and `Refs #N`.
 - **Проверки:** tick only what you actually ran and saw pass (`mise run check`, the tests you added); strike out a check that doesn't apply and say why. Never tick a check you didn't run.
+- **Сценарии проверки:** `Спецификация: #N` of the agreed spec (or «нет» for docs/CI), and the main and adjacent scenarios copied from its `## Verification Scenarios`. Add the verify run link and artifact SHA once the run for your last push has finished; leave the human checkboxes unticked.
 - **Риск:** keep one level and name what can break in the API contract, data, and CI/deploy, or write «нет».
 - **Откат:** how to undo the change and anything beyond a revert (data, secrets, Render settings).
 
 After pushing a `claude/…` branch, put the filled description in your reply under the PR link, so whoever opens the PR pastes it. When asked on an existing PR, write it into the PR body with `gh api -X PATCH repos/{owner}/{repo}/pulls/{number} -f body=…`.
+
+### Proving the change
+
+The scenarios come from the spec, not from you: implement against the main and adjacent scenarios it selected, and don't change that choice in the PR. `.github/workflows/verify.yml` checks them in a separate job, outside your session. Make its base check pass:
+
+- **Bug fix:** the new or extended test fails on the base commit and passes after the fix; the adjacent scenario passes on both.
+- **New feature:** the main scenario fails without the new behaviour and passes with it.
+- Extending an existing e2e test with the new steps is fine when it fits better than a new test.
 
 ## Agent skills
 
