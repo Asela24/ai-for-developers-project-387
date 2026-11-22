@@ -5,10 +5,14 @@ pnpm workspace: `apps/server` (Fastify) and `apps/web` (Vite + React + TanStack 
 ## Commands
 
 ```bash
+mise run install        # install dependencies (pnpm install)
 mise run check          # every gate, same as CI: lint, format, types, knip, syncpack, API tests, contract drift, booking-rule probe, Playwright e2e on a real server, build
 mise run fix            # autofix formatting
+mise run test           # unit/API tests in all packages
+mise run typecheck      # typecheck all packages
+mise run build          # build all packages
 pnpm contract           # regenerate OpenAPI, web SDK and server types from specs/*.tsp
-mise daemons start web  # dev servers: server :3000, web :5173 (use daemons, not `pnpm dev &`)
+mise run dev            # dev servers as daemons: server :3000, web :5173 (same as `mise daemons start web`; never `pnpm dev &`)
 mise daemons ls | logs server | stop web server
 pnpm --filter server exec vitest run src/app.test.ts   # single test file
 ```
@@ -37,6 +41,10 @@ Change the source, then regenerate. Edit these files only through their generato
 - Don't disable lint rules or weaken checks to make a change pass. Exceptions stay narrow and commented (see `.oxlintrc.json`, `knip.jsonc`, `.oxfmtrc.json`, `hk.pkl`).
 - Commits follow Conventional Commits (`feat(web): …`, `fix(server): …`, `chore: …`), enforced by commitlint in the `commit-msg` hook.
 - Implementation commits name their ticket in a `Refs #N` footer (the GitHub issue the change implements).
+
+## GitHub agent (`@claude`)
+
+`.github/workflows/claude.yml` runs Claude Code when an OWNER/MEMBER/COLLABORATOR comments `@claude` in an issue or PR (the only mention; no session share links). On the runner the agent may use only: `gh issue`, `gh label`, `gh api`, `gh pr view`, `gh pr diff`, `pnpm`, `mise run` and `git`. Verify work with `mise run check`. Push to a `claude/…` branch; never to `main`. Details in README.
 
 ## Agent skills
 
