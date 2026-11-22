@@ -1,0 +1,10 @@
+# Reviewed, narrowly scoped waivers. Check expires before extending.
+ignores:
+  - rule: dangerous-triggers
+    file: .github/workflows/opencode.yml
+    reason: >-
+      The /oc feature requires issue_comment and pull_request_review_comment.
+      The job is gated to OWNER/MEMBER/COLLABORATOR commenters, uses a read-only
+      GITHUB_TOKEN, exchanges OIDC for the OpenCode App token, pins every action
+      to a full SHA, and never checks out or runs pull request code.
+    expires: "2027-02-22"
