@@ -59,11 +59,15 @@ if [ "$actual_sha" != "$HEAD_SHA" ]; then
   exit 1
 fi
 
-spec=$(printf '%s\n' "$PR_BODY" | grep -oE 'Спецификация:[^#0-9]*#[0-9]+' | grep -oE '[0-9]+$' | head -1 || true)
+# The field must start its own line ("**Спецификация:** #9", "- Спецификация: #9"),
+# so prose that mentions the word elsewhere in the body is not picked up.
+field='^[-*[:space:]]*Спецификация:[*[:space:]]*'
+body=$(printf '%s\n' "$PR_BODY" | tr -d '\r')
+spec=$(printf '%s\n' "$body" | grep -oE "$field#[0-9]+" | grep -oE '[0-9]+$' | head -1 || true)
 main=""
 adjacent=""
 if [ -z "$spec" ]; then
-  if printf '%s\n' "$PR_BODY" | grep -qE 'Спецификация:[*_ ]*нет'; then
+  if printf '%s\n' "$body" | grep -qE "${field}нет"; then
     finish "not applicable: в PR указано «Спецификация: нет»"
     exit 0
   fi
@@ -72,7 +76,7 @@ if [ -z "$spec" ]; then
   exit 1
 fi
 
-spec_body=$(gh issue view "$spec" --repo "$REPO" --json body --jq .body)
+spec_body=$(gh issue view "$spec" --repo "$REPO" --json body --jq .body | tr -d '\r')
 scenarios=$(printf '%s\n' "$spec_body" | sed -n '/^## Verification Scenarios/,/^## /p')
 main=$(printf '%s\n' "$scenarios" | sed -nE 's/^- Main: `(.+)`.*$/\1/p' | head -1)
 adjacent=$(printf '%s\n' "$scenarios" | sed -nE 's/^- Adjacent: `(.+)`.*$/\1/p' | head -1)
