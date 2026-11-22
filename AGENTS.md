@@ -54,7 +54,7 @@ GitHub Issues of [`Asela24/ai-for-developers-project-387`](https://github.com/As
 
 ### Triage labels
 
-Default labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+Labels: `ready-for-agent`, `needs-info`, `wontfix`; no label means not triaged. New issues are auto-triaged by `.github/workflows/claude-triage.yml` with the `triage` skill. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 

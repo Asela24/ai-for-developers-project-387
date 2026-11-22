@@ -1,15 +1,16 @@
 # Triage Labels
 
-The skills speak in terms of five canonical triage roles. This file maps those roles to the actual label strings used in this repo's issue tracker.
+Two labels carry the whole triage state; `wontfix` is GitHub's default label. An open issue with none of them is an incoming request that nobody has triaged yet.
 
-| Label in mattpocock/skills | Label in our tracker | Meaning                                  |
-| -------------------------- | -------------------- | ---------------------------------------- |
-| `needs-triage`             | `needs-triage`       | Maintainer needs to evaluate this issue  |
-| `needs-info`               | `needs-info`         | Waiting on reporter for more information |
-| `ready-for-agent`          | `ready-for-agent`    | Fully specified, ready for an AFK agent  |
-| `ready-for-human`          | `ready-for-human`    | Requires human implementation            |
-| `wontfix`                  | `wontfix`            | Will not be actioned                     |
+| Label in our tracker | Set by                                           | Meaning                                     |
+| -------------------- | ------------------------------------------------ | ------------------------------------------- |
+| `ready-for-agent`    | `to-spec`, `to-tickets`, or a human after triage | Fully specified, an agent can implement it  |
+| `needs-info`         | `triage`                                         | Waiting on the reporter to answer questions |
+| `wontfix`            | a human                                          | Will not be actioned                        |
 
-When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
+Roles the mattpocock/skills name map onto these:
 
-Edit the "Label in our tracker" column to match whatever vocabulary you actually use.
+- `needs-triage`: no label. Absence of every label above means "not triaged".
+- `ready-for-human`: not used. A human picks up any open issue without `ready-for-agent`.
+
+The auto-triage workflow (`.github/workflows/claude-triage.yml`) skips an issue that already has any label from the table, so tickets from `to-tickets` and specs from `to-spec` are never triaged again.
