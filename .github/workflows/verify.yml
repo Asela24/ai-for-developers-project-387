@@ -1,0 +1,69 @@
+name: verify
+
+on:
+  pull_request:
+    # edited: the PR body names the spec, so filling it in re-runs the check.
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+
+# The job is the only consumer of these permissions.
+permissions: {}
+
+jobs:
+  scenarios:
+    name: Main and adjacent scenarios from the spec
+    # No model secret here: this job runs PR code, and it is independent of the
+    # session that implemented the change and of the Claude review.
+    # One run per PR; a new push cancels the stale one. Artifacts of finished
+    # runs stay as evidence of the version they checked.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      # Reads the spec issue named in the PR body.
+      issues: read
+      pull-requests: read
+    steps:
+      # The PR head itself, not the merge commit pull_request checks out by
+      # default. Full history so the base commit is available too.
+      - name: Checkout PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Prints the SHA actually under test: the evidence of which version ran.
+      - name: Show commit under test
+        run: git rev-parse HEAD
+
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.3
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: Verify scenarios
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          # Untrusted text: passed through env, never interpolated into run.
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          EVIDENCE_DIR: ${{ runner.temp }}/evidence
+        run: bash scripts/verify-scenarios.sh
+
+      # SHA, verdict, logs and Playwright traces, kept even when the check fails.
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verification-pr${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/evidence
+          if-no-files-found: warn
+          retention-days: 30
