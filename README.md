@@ -72,6 +72,28 @@ docker run --rm -e PORT=8080 -p 8080:8080 easybook
 3. Запустите Claude Code в корне репозитория и разрешите проектный сервер `render`. `/mcp` покажет его статус.
 4. Выберите workspace: «Set my Render workspace to <имя>».
 
+## ИИ-агент в issues и PR (`@claude`)
+
+Воркфлоу [`.github/workflows/claude.yml`](.github/workflows/claude.yml) запускает [Claude Code](https://github.com/anthropics/claude-code-action) прямо в GitHub: агент берёт задачу из комментария, работает на свежем раннере и отвечает в том же issue или PR.
+
+- **Событие:** новый комментарий в issue или PR (`issue_comment` и `pull_request_review_comment`, только `types: [created]`).
+- **Команда (mentions):** только `@claude`. Других триггеров нет: `/claude`, назначение исполнителя и метки не настроены.
+- **Кто может запустить:** только люди с ролью OWNER, MEMBER или COLLABORATOR. Комментарии ботов игнорируются, PR из форков отклоняются до использования секретов.
+- **Модель:** `claude-opus-5-5`, авторизация через подписку Claude (секрет `CLAUDE_CODE_OAUTH_TOKEN` в GitHub Secrets).
+- **Назначение:** отвечать на вопросы по коду, ревьюить PR, вести задачи по процессу первого проекта. В `.claude/skills/` лежат скиллы `to-spec`, `to-tickets`, `implement-spec` и `tdd` (из [mattpocock/skills](https://github.com/mattpocock/skills)). Настройки трекера берутся из `docs/agents/` через `AGENTS.md`.
+- **Результат:** один комментарий агента, который обновляется по ходу работы. Изменения в коде агент пушит в ветку `claude/…` и даёт ссылку на создание PR. Сам PR не создаёт и в `main` не мержит. Прогон виден во вкладке Actions.
+- **Ограничения:** не больше одного запуска на issue/PR одновременно (остальные ждут в очереди), тайм-аут 30 минут.
+- **Решение по share:** публичных ссылок на сессию нет. Ход работы виден в комментарии агента и в логе прогона в Actions.
+
+Примеры:
+
+```text
+@claude объясни, как устроена проверка пересечений броней
+@claude /to-spec по обсуждению выше
+@claude /to-tickets #12
+@claude /implement-spec #12
+```
+
 ---
 
 <details>
