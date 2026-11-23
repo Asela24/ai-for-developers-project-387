@@ -3,11 +3,12 @@ name: claude-deps
 on:
   # Night from Monday to Tuesday, every week of November: Monday 22:00 UTC
   # (01:00 Tuesday, Moscow). Cron has no year field, so the gate step below
-  # skips scheduled runs outside November 2026. The workflow is temporary and
-  # is removed on Friday, 27 November 2026.
+  # skips scheduled runs outside November 2026. The workflow is temporary:
+  # from Friday, 27 November 2026 (UTC) the gate skips every run, scheduled
+  # or manual, and the file is deleted in #18.
   schedule:
     - cron: "0 22 * 11 1"
-  # Manual run from the Actions tab, any date.
+  # Manual run from the Actions tab, until 26 November 2026.
   workflow_dispatch:
 
 # The job is the only consumer of these permissions.
@@ -30,12 +31,15 @@ jobs:
       # Exchanged for the Claude GitHub App token that writes the issue.
       id-token: write
     steps:
-      - name: Gate on November 2026
+      - name: Gate on November 2026, until the 27th
         id: gate
         env:
           EVENT: ${{ github.event_name }}
         run: |
-          if [ "$EVENT" = "schedule" ] && [ "$(date -u +%Y-%m)" != "2026-11" ]; then
+          if [ "$(date -u +%Y%m%d)" -ge 20261127 ]; then
+            echo "The workflow was retired on 27 November 2026; skipping."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT" = "schedule" ] && [ "$(date -u +%Y-%m)" != "2026-11" ]; then
             echo "Scheduled analysis runs only in November 2026; skipping."
             echo "run=false" >> "$GITHUB_OUTPUT"
           else
