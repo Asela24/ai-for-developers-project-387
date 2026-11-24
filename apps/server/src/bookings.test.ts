@@ -129,6 +129,7 @@ const booking = {
   start: ten,
   guestName: "Анна",
   guestEmail: "anna@example.com",
+  bookingTopic: "Обсудить план проекта",
 };
 
 const appWith = async (...eventTypes: Array<typeof hour>) => (await ownerApp({ eventTypes })).app;
@@ -144,6 +145,7 @@ it("Guest books a free Slot and gets the Booking back without an id", async () =
   expect(res.statusCode).toBe(201);
   const body = res.json() as Record<string, string>;
   expect(Object.keys(body).toSorted()).toEqual([
+    "bookingTopic",
     "end",
     "eventTypeId",
     "guestEmail",
@@ -155,6 +157,7 @@ it("Guest books a free Slot and gets the Booking back without an id", async () =
   expect(new Date(body.end ?? "").toISOString()).toBe("2026-11-16T10:00:00.000Z");
   expect(body.guestName).toBe("Анна");
   expect(body.guestEmail).toBe("anna@example.com");
+  expect(body.bookingTopic).toBe("Обсудить план проекта");
 });
 
 it("shows a booked Slot as busy without the Guest's name or email", async () => {
@@ -168,6 +171,8 @@ it("shows a booked Slot as busy without the Guest's name or email", async () => 
   expect(taken).toEqual([{ start: expect.any(String), end: expect.any(String), status: "busy" }]);
   expect(new Date(taken[0]?.start ?? "").toISOString()).toBe(ten);
   expect(listed.body).not.toContain("Анна");
+  expect(listed.body).not.toContain("bookingTopic");
+  expect(listed.body).not.toContain("Обсудить план проекта");
   expect(listed.body).not.toContain("anna@example.com");
 });
 
@@ -204,6 +209,21 @@ it("rejects booking the same Slot twice as a conflict", async () => {
 
   expect(again.statusCode).toBe(409);
   expect(again.json()).toEqual(conflict);
+});
+
+it("rejects an invalid topic as a data error before the conflict check", async () => {
+  const app = await appWith(hour);
+  expect((await book(app, booking)).statusCode).toBe(201);
+  const { bookingTopic: _topic, ...withoutTopic } = booking;
+
+  for (const payload of [withoutTopic, { ...booking, bookingTopic: "" }]) {
+    const res = await book(app, payload);
+    expect({ payload, status: res.statusCode, body: res.json() }).toEqual({
+      payload,
+      status: 400,
+      body: dataError,
+    });
+  }
 });
 
 it("allows a start at 11:00 right after a 10:00–11:00 Booking", async () => {
@@ -308,8 +328,27 @@ it("rejects Booking fields outside the limits as a data error", async () => {
     { ...booking, guestEmail: "a@b@example.com" },
     { ...booking, guestEmail: `${"a".repeat(243)}@example.com` },
     { ...booking, start: "завтра" },
-    { eventTypeId: "hour", start: ten, guestName: "Анна" },
-    { eventTypeId: "hour", start: ten, guestEmail: "anna@example.com" },
+    { eventTypeId: "hour", start: ten, guestName: "Анна", bookingTopic: "Тема" },
+    { eventTypeId: "hour", start: ten, guestEmail: "anna@example.com", bookingTopic: "Тема" },
+    { eventTypeId: "hour", start: ten, guestName: "Анна", guestEmail: "anna@example.com" },
+    { ...booking, bookingTopic: "" },
+    { ...booking, bookingTopic: "т".repeat(501) },
+    { ...booking, bookingTopic: 42 },
+    // Earlier field names are not accepted in place of the current one.
+    {
+      eventTypeId: "hour",
+      start: ten,
+      guestName: "Анна",
+      guestEmail: "anna@example.com",
+      topic: "Тема",
+    },
+    {
+      eventTypeId: "hour",
+      start: ten,
+      guestName: "Анна",
+      guestEmail: "anna@example.com",
+      meeting_topic: "Тема",
+    },
   ];
 
   for (const payload of invalid) {
@@ -336,7 +375,18 @@ it("accepts Booking fields at the limit boundaries", async () => {
     ...booking,
     guestName: "н".repeat(120),
     guestEmail: `${"a".repeat(242)}@example.com`,
+    bookingTopic: "т".repeat(500),
   });
 
   expect(res.statusCode).toBe(201);
+  expect((res.json() as { bookingTopic: string }).bookingTopic).toBe("т".repeat(500));
+});
+
+it("accepts a one-character topic and returns it exactly as sent", async () => {
+  const app = await appWith(hour);
+
+  const res = await book(app, { ...booking, bookingTopic: "?" });
+
+  expect(res.statusCode).toBe(201);
+  expect((res.json() as { bookingTopic: string }).bookingTopic).toBe("?");
 });

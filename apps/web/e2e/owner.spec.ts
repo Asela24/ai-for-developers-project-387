@@ -21,7 +21,12 @@ const intervalLabel = (start: string, end: string) => {
 };
 
 // A Guest books a Slot three quarters into the window; other scenarios take other Slots.
-const bookAsGuest = async (eventTypeId: string, guestName: string, guestEmail: string) => {
+const bookAsGuest = async (
+  eventTypeId: string,
+  guestName: string,
+  guestEmail: string,
+  topic: string,
+) => {
   const slots = (await (await fetch(`${api}/event-types/${eventTypeId}/slots`)).json()) as Array<{
     start: string;
     end: string;
@@ -33,7 +38,13 @@ const bookAsGuest = async (eventTypeId: string, guestName: string, guestEmail: s
   const booked = await fetch(`${api}/bookings`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ eventTypeId, start: slot?.start, guestName, guestEmail }),
+    body: JSON.stringify({
+      eventTypeId,
+      start: slot?.start,
+      guestName,
+      guestEmail,
+      bookingTopic: topic,
+    }),
   });
   expect(booked.status).toBe(201);
   return intervalLabel(slot?.start ?? "", slot?.end ?? "");
@@ -78,18 +89,24 @@ test("Owner creates an Event type, sees and deletes its Bookings, then deletes t
     "15 мин",
   );
 
-  const firstInterval = await bookAsGuest("owner-intro", "Олег", "oleg@example.com");
+  const firstInterval = await bookAsGuest(
+    "owner-intro",
+    "Олег",
+    "oleg@example.com",
+    "Состав команды",
+  );
   await page.reload();
   const upcoming = page.getByRole("region", { name: "Предстоящие бронирования" });
   const booking = upcoming.getByRole("listitem").filter({ hasText: "oleg@example.com" });
   await expect(booking).toContainText("Олег");
   await expect(booking).toContainText("Вводная сессия");
   await expect(booking).toContainText(firstInterval);
+  await expect(booking).toContainText("Состав команды");
 
   await booking.getByRole("button", { name: "Удалить бронирование" }).click();
   await expect(upcoming.getByText("oleg@example.com")).toHaveCount(0);
 
-  await bookAsGuest("owner-intro", "Нина", "nina@example.com");
+  await bookAsGuest("owner-intro", "Нина", "nina@example.com", "Онбординг");
   await page.reload();
   await expect(upcoming.getByText("nina@example.com")).toBeVisible();
 

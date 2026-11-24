@@ -80,6 +80,7 @@ const toBooking = (stored: StoredBooking): Booking => ({
   end: stored.end.toISOString(),
   guestName: stored.guestName,
   guestEmail: stored.guestEmail,
+  bookingTopic: stored.bookingTopic,
 });
 
 const toOwnerBooking = (stored: StoredBooking): OwnerBooking => ({
@@ -172,6 +173,7 @@ export const buildApp = ({
           eventTypeId: body.eventTypeId,
           guestName: body.guestName,
           guestEmail: body.guestEmail,
+          bookingTopic: body.bookingTopic,
         });
         if (reserved === "conflict") {
           reply.code(409);

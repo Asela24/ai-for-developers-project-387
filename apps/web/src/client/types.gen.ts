@@ -13,6 +13,7 @@ export type Booking = {
     end: string;
     guestName: string;
     guestEmail: string;
+    bookingTopic: string;
 };
 
 export type CreateBooking = {
@@ -26,6 +27,10 @@ export type CreateBooking = {
      * One `@` with text on both sides.
      */
     guestEmail: string;
+    /**
+     * What the Guest wants to talk about; stored and returned exactly as sent.
+     */
+    bookingTopic: string;
 };
 
 export type CreateEventType = {
@@ -60,6 +65,7 @@ export type OwnerBooking = {
     end: string;
     guestName: string;
     guestEmail: string;
+    bookingTopic: string;
 };
 
 /**

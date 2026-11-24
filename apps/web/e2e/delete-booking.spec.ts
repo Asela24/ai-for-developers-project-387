@@ -33,6 +33,7 @@ test("after the Owner deletes a Booking its Slot shows as free again", async ({ 
       start,
       guestName: "Вера",
       guestEmail: "vera@example.com",
+      bookingTopic: "Консультация по проекту",
     }),
   });
   expect(booked.status).toBe(201);

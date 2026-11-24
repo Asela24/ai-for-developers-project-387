@@ -6,7 +6,13 @@ import { buildApp } from "./app.js";
 export type Injector = Pick<ReturnType<typeof buildApp>, "inject">;
 
 type EventTypePayload = { id: string; name: string; description: string; durationMinutes: number };
-type BookingPayload = { eventTypeId: string; start: string; guestName: string; guestEmail: string };
+type BookingPayload = {
+  eventTypeId: string;
+  start: string;
+  guestName: string;
+  guestEmail: string;
+  bookingTopic: string;
+};
 
 // 2026-11-15 08:00 Europe/Belgrade (UTC+1), before working hours, so the whole grid is offered.
 export const beforeHours = new Date("2026-11-15T07:00:00.000Z");

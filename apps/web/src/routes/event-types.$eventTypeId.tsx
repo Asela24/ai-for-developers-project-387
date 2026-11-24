@@ -60,6 +60,7 @@ function EventTypeView() {
   const [step, setStep] = useState<"slot" | "guest">("slot");
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
+  const [topic, setTopic] = useState("");
   const [booked, setBooked] = useState<Booking>();
   const [failure, setFailure] = useState("");
 
@@ -103,7 +104,7 @@ function EventTypeView() {
     event.preventDefault();
     if (!chosen) return;
     const result = await createBooking({
-      body: { eventTypeId, start: chosen.start, guestName, guestEmail },
+      body: { eventTypeId, start: chosen.start, guestName, guestEmail, bookingTopic: topic },
     });
     if (result.data) {
       setBooked(result.data);
@@ -111,6 +112,7 @@ function EventTypeView() {
       setChosen(undefined);
       setGuestName("");
       setGuestEmail("");
+      setTopic("");
       setStep("slot");
     } else {
       setFailure(result.error?.message ?? "Проверьте данные и попробуйте ещё раз.");
@@ -338,6 +340,16 @@ function EventTypeView() {
                 maxLength={254}
                 value={guestEmail}
                 onChange={(event) => setGuestEmail(event.target.value)}
+              />
+            </label>
+            <label className="block space-y-1.5 text-sm">
+              <span className="text-muted-foreground">Тема разговора</span>
+              <textarea
+                className={cn(inputClass, "h-20 py-2")}
+                required
+                maxLength={500}
+                value={topic}
+                onChange={(event) => setTopic(event.target.value)}
               />
             </label>
             {failure && (
